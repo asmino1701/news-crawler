@@ -21,4 +21,12 @@ describe("fetchFrontPage", () => {
             }),
         }));
     });
+
+    it("passes a timeout signal to the request", async () => {
+        const fakeFetch = vi.fn().mockResolvedValue(new Response("<html>ok</html>", { status: 200 }));
+        await fetchFrontPage(fakeFetch);
+        expect(fakeFetch).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+            signal: expect.any(AbortSignal),
+        }));
+    });
 });
