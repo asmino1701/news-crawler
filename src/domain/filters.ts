@@ -21,6 +21,12 @@ export const SHORT_TITLES: EntryFilter = {
     sortBy: "points",
 };
 
+export const FILTERS: readonly EntryFilter[] = [LONG_TITLES, SHORT_TITLES];
+
+export function findFilter(name: string): EntryFilter | undefined {
+    return FILTERS.find((filter) => filter.name === name);
+}
+
 export function applyFilter(entries: readonly Entry[], filter: EntryFilter): Entry[] {
     return entries
         .filter(filter.predicate)
