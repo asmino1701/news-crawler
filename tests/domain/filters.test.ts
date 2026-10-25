@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { Entry } from "../../src/domain/entry";
-import { applyFilter, LONG_TITLES, SHORT_TITLES } from "../../src/domain/filters";
+import { applyFilter, findFilter, LONG_TITLES, SHORT_TITLES } from "../../src/domain/filters";
 
 const ENTRIES: Entry[] = [
     { rank: 1, title: "Show HN: I built a tiny compiler in Rust", points: 50, comments: 10 },
@@ -44,4 +44,18 @@ describe("applyFilter", () => {
 
     });
 
+});
+
+describe("findFilter", () => {
+    it("returns the long titles filter by its name", () => {
+        expect(findFilter("long-titles")).toBe(LONG_TITLES);
+    });
+
+    it("returns the short titles filter by its name", () => {
+        expect(findFilter("short-titles")).toBe(SHORT_TITLES);
+    });
+
+    it("returns undefined for an unknown filter name", () => {
+        expect(findFilter("medium-titles")).toBeUndefined();
+    });
 });
