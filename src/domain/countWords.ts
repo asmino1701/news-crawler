@@ -1,5 +1,3 @@
-
-
 const WHITESPACE = /\s+/;
 const HAS_LETTER_OR_NUMBER = /[\p{L}\p{N}]/u;
 
