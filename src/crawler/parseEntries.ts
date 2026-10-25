@@ -3,13 +3,13 @@ import type { Entry } from "../domain/entry";
 
 const FIRST_NUMBER = /\d+/;
 
-// Función auxiliar: saca el primer número de un texto, o 0 si no hay
+// Helper: returns the first number in a text, or 0 if there is none
 function extractNumber(text: string): number {
     const match = text.match(FIRST_NUMBER);
     return match ? parseInt(match[0], 10) : 0;
 }
 
-// Función principal: HTML completo → lista de Entry
+// Main function: full front page HTML → list of entries
 export function parseEntries(html: string): Entry[] {
     const $ = load(html);
 
