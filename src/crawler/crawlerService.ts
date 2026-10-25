@@ -1,6 +1,7 @@
 import type { Entry } from "../domain/entry";
 import { applyFilter, type EntryFilter } from "../domain/filters";
 import type { UsageRepository } from "../usage/usageLog";
+import { toErrorMessage } from "../shared/errors";
 import { parseEntries } from "./parseEntries";
 
 const MAX_ENTRIES = 30;
@@ -14,10 +15,6 @@ export type CrawlerDependencies = {
 export type CrawlerService = {
     readonly crawl: (filter: EntryFilter) => Promise<Entry[]>;
 };
-
-function toErrorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : String(error);
-}
 
 export function createCrawlerService({ fetchPage, usageRepository, now }: CrawlerDependencies): CrawlerService {
     function recordUsage(filter: EntryFilter, startMs: number, resultCount: number, error: string | null): void {
