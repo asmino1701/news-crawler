@@ -1,12 +1,28 @@
 import { countWords } from "./countWords";
-import { Entry } from "./entry";
+import type { Entry } from "./entry";
 
-type EntryFilter = (entry: Entry) => boolean;
+const TITLE_WORD_LIMIT = 5;
+
+export type EntryFilter = {
+    readonly name: string;
+    readonly predicate: (entry: Entry) => boolean;
+    readonly sortBy: "comments" | "points";
+};
+
+export const LONG_TITLES: EntryFilter = {
+    name: "long-titles",
+    predicate: (entry) => countWords(entry.title) > TITLE_WORD_LIMIT,
+    sortBy: "comments",
+};
+
+export const SHORT_TITLES: EntryFilter = {
+    name: "short-titles",
+    predicate: (entry) => countWords(entry.title) <= TITLE_WORD_LIMIT,
+    sortBy: "points",
+};
 
 export function applyFilter(entries: readonly Entry[], filter: EntryFilter): Entry[] {
-    return entries.filter(filter);
+    return entries
+        .filter(filter.predicate)
+        .toSorted((a, b) => b[filter.sortBy] - a[filter.sortBy] || a.rank - b.rank);
 }
-
-export const LONG_TITLES: EntryFilter = (entry) => countWords(entry.title) > 5; { }
-
-export const SHORT_TITLES: EntryFilter = (entry) => countWords(entry.title) <= 5;
