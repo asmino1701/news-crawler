@@ -12,7 +12,7 @@ describe("fetchFrontPage", () => {
         await expect(fetchFrontPage(fakeFetch)).rejects.toThrow(/503/);
     });
 
-    it("Send user-agent header", async () => {
+    it("sends an identifying User-Agent header", async () => {
         const fakeFetch = vi.fn().mockResolvedValue(new Response("<html>ok</html>", { status: 200 }));
         await fetchFrontPage(fakeFetch);
         expect(fakeFetch).toHaveBeenCalledWith("https://news.ycombinator.com/", expect.objectContaining({
