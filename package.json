@@ -8,6 +8,7 @@
     "node": ">=22.13.0"
   },
   "scripts": {
+    "start": "tsx src/server.ts",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
