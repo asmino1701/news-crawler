@@ -44,6 +44,19 @@ describe("applyFilter", () => {
 
     });
 
+    describe("at the five-word limit", () => {
+        const fiveWords: Entry = { rank: 1, title: "This is - a self-explained example", points: 80, comments: 3 };
+        const sixWords: Entry = { rank: 2, title: "Rust is a systems programming language", points: 40, comments: 12 };
+
+        it("keeps a six-word title in LONG_TITLES only", () => {
+            expect(applyFilter([fiveWords, sixWords], LONG_TITLES)).toEqual([sixWords]);
+        });
+
+        it("keeps a five-word title in SHORT_TITLES only", () => {
+            expect(applyFilter([fiveWords, sixWords], SHORT_TITLES)).toEqual([fiveWords]);
+        });
+    });
+
 });
 
 describe("findFilter", () => {
