@@ -23,7 +23,7 @@ describe("parseEntries", () => {
             const titles = entries.map((entry) => entry.title.trim());
             expect(titles).not.toContain("");
         });
-        it("Points and comments are greater than or equal to zero", () => {
+        it("returns points and comments as non-negative numbers", () => {
             for (let i = 0; i < entries.length; i++) {
                 expect(entries[i].points).toBeGreaterThanOrEqual(0);
                 expect(entries[i].comments).toBeGreaterThanOrEqual(0);
@@ -69,7 +69,7 @@ describe("parseEntries", () => {
                 { rank: 10, title: "Ask HN: What are you working on?", points: 12, comments: 0 },
             ]);
         });
-        it("singular points and comments", () => {
+        it("parses singular point and comment", () => {
             const html = buildEntryHtml(
                 15,
                 "Rust is a systems programming language",
@@ -80,7 +80,7 @@ describe("parseEntries", () => {
                 { rank: 15, title: "Rust is a systems programming language", points: 1, comments: 1 },
             ]);
         });
-        it("parses comment counts separated by &nbsp;)", () => {
+        it("parses comment counts separated by &nbsp;", () => {
             const html = buildEntryHtml(
                 20,
                 "Python | Go — Rust & C",
