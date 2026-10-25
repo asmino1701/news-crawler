@@ -2,13 +2,7 @@ import type { CrawlerService } from "../crawler/crawlerService";
 import { FILTERS, findFilter } from "../domain/filters";
 import { toErrorMessage } from "../shared/errors";
 import type { UsageRepository } from "../usage/usageLog";
-
-const HTTP_STATUS = {
-    OK: 200,
-    BAD_REQUEST: 400,
-    NOT_FOUND: 404,
-    BAD_GATEWAY: 502,
-} as const;
+import { HTTP_STATUS } from "./httpStatus";
 
 const VALID_FILTER_NAMES = FILTERS.map((filter) => filter.name).join(", ");
 
