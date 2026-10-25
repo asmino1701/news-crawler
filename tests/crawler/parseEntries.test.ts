@@ -38,7 +38,7 @@ describe("parseEntries", () => {
                 <table>
                     <tr class="athing submission" id="${rank}">
                     <td class="title"><span class="rank">${rank}.</span></td>
-                    <td class="title"><span class="titleline"><a href="https://example.com">${title}</a></span></td>
+                    <td class="title"><span class="titleline"><a href="https://example.com">${title}</a>   <span class="sitebit comhead"> (<a href="from?site=example.com"><span class="sitestr">example.com</span></a>)</span></span></td>
                     </tr>
                     <tr>
                     <td class="subtext"><span class="subline">${subline}</span></td>
