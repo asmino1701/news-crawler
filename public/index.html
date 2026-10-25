@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>news-crawler</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 960px; margin: 0 auto; padding: 16px; color: #222; }
+        button { padding: 8px 14px; margin-right: 8px; cursor: pointer; }
+        button:disabled { cursor: wait; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #ddd; }
+        th { background: #f4f4f4; }
+        .number { text-align: right; }
+        #status { margin-top: 12px; color: #555; }
+    </style>
+</head>
+<body>
+    <h1>news-crawler</h1>
+    <p>First 30 entries of Hacker News, filtered by title length.</p>
+
+    <button data-filter="long-titles">More than 5 words, by comments</button>
+    <button data-filter="short-titles">5 words or fewer, by points</button>
+    <p id="status">Choose a filter to crawl the front page.</p>
+
+    <table>
+        <thead><tr><th class="number">Rank</th><th>Title</th><th class="number">Points</th><th class="number">Comments</th></tr></thead>
+        <tbody id="entries"></tbody>
+    </table>
+
+    <h2>Usage</h2>
+    <table>
+        <thead><tr><th>Requested at</th><th>Filter</th><th class="number">Duration (ms)</th><th class="number">Results</th><th>Error</th></tr></thead>
+        <tbody id="usage"></tbody>
+    </table>
+
+    <script type="module">
+        const ENTRY_COLUMNS = ["rank", "title", "points", "comments"];
+        const USAGE_COLUMNS = ["requestedAt", "filter", "durationMs", "resultCount", "error"];
+        const NUMBER_COLUMNS = new Set(["rank", "points", "comments", "durationMs", "resultCount"]);
+
+        const buttons = document.querySelectorAll("button[data-filter]");
+        const status = document.getElementById("status");
+
+        async function getJson(path) {
+            const response = await fetch(path);
+            const body = await response.json();
+            if (!response.ok) throw new Error(body.error);
+            return body;
+        }
+
+        // textContent, never innerHTML: titles come from an external site.
+        function toRow(item, columns) {
+            const row = document.createElement("tr");
+            row.append(...columns.map((column) => {
+                const cell = document.createElement("td");
+                cell.textContent = item[column] ?? "";
+                cell.className = NUMBER_COLUMNS.has(column) ? "number" : "";
+                return cell;
+            }));
+            return row;
+        }
+
+        function render(tableBodyId, items, columns) {
+            document.getElementById(tableBodyId).replaceChildren(...items.map((item) => toRow(item, columns)));
+        }
+
+        async function refreshUsage() {
+            render("usage", (await getJson("/usage")).toReversed(), USAGE_COLUMNS);
+        }
+
+        async function crawl(filter) {
+            buttons.forEach((button) => (button.disabled = true));
+            status.textContent = "Crawling Hacker News…";
+            try {
+                const entries = await getJson(`/entries?filter=${filter}`);
+                render("entries", entries, ENTRY_COLUMNS);
+                status.textContent = `${entries.length} entries for ${filter}.`;
+            } catch (error) {
+                status.textContent = `Error: ${error.message}`;
+            } finally {
+                buttons.forEach((button) => (button.disabled = false));
+                await refreshUsage();
+            }
+        }
+
+        buttons.forEach((button) => button.addEventListener("click", () => crawl(button.dataset.filter)));
+        refreshUsage();
+    </script>
+</body>
+</html>

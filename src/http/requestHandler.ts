@@ -5,10 +5,12 @@ import type { UsageRepository } from "../usage/usageLog";
 import { HTTP_STATUS } from "./httpStatus";
 
 const VALID_FILTER_NAMES = FILTERS.map((filter) => filter.name).join(", ");
+const HTML_CONTENT_TYPE = "text/html; charset=utf-8";
 
 export type RequestHandlerDependencies = {
     readonly crawlerService: CrawlerService;
     readonly usageRepository: UsageRepository;
+    readonly indexHtml: string;
 };
 
 export type RequestHandler = (request: Request) => Promise<Response>;
@@ -17,7 +19,15 @@ function json(body: unknown, status: number = HTTP_STATUS.OK): Response {
     return Response.json(body, { status });
 }
 
-export function createRequestHandler({ crawlerService, usageRepository }: RequestHandlerDependencies): RequestHandler {
+export function createRequestHandler({
+    crawlerService,
+    usageRepository,
+    indexHtml,
+}: RequestHandlerDependencies): RequestHandler {
+    async function getIndex(): Promise<Response> {
+        return new Response(indexHtml, { headers: { "Content-Type": HTML_CONTENT_TYPE } });
+    }
+
     async function getEntries(url: URL): Promise<Response> {
         const filter = findFilter(url.searchParams.get("filter") ?? "");
 
@@ -37,6 +47,7 @@ export function createRequestHandler({ crawlerService, usageRepository }: Reques
     }
 
     const getRoutes: ReadonlyMap<string, (url: URL) => Promise<Response>> = new Map([
+        ["/", getIndex],
         ["/entries", getEntries],
         ["/usage", getUsage],
     ]);
