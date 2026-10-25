@@ -29,10 +29,12 @@ const USAGE_LOGS: UsageLog[] = [
     },
 ];
 
+const INDEX_HTML = "<!doctype html><title>news-crawler</title>";
+
 function createFakes(crawl: CrawlerService["crawl"] = vi.fn().mockResolvedValue(ENTRIES)) {
     const crawlerService: CrawlerService = { crawl };
     const usageRepository: UsageRepository = { record: vi.fn(), findAll: () => USAGE_LOGS };
-    const handle = createRequestHandler({ crawlerService, usageRepository });
+    const handle = createRequestHandler({ crawlerService, usageRepository, indexHtml: INDEX_HTML });
 
     return { handle, crawlerService };
 }
@@ -85,6 +87,18 @@ describe("createRequestHandler", () => {
             await expect(response.json()).resolves.toEqual({
                 error: "Failed to fetch front page: 503 Service Unavailable",
             });
+        });
+    });
+
+    describe("GET /", () => {
+        it("responds 200 with the web page as HTML", async () => {
+            const { handle } = createFakes();
+
+            const response = await handle(get("/"));
+
+            expect(response.status).toBe(200);
+            expect(response.headers.get("Content-Type")).toBe("text/html; charset=utf-8");
+            await expect(response.text()).resolves.toBe(INDEX_HTML);
         });
     });
 

@@ -1,7 +1,7 @@
 # news-crawler
 
 A small web crawler for the first 30 entries of [Hacker News](https://news.ycombinator.com/),
-exposed as an HTTP API. It extracts each entry's rank, title, points and number of comments,
+exposed as an HTTP API and a minimal web page. It extracts each entry's rank, title, points and number of comments,
 applies one of two filters and records every request in a SQLite database.
 
 - **long-titles**: titles with more than five words, ordered by number of comments.
@@ -15,7 +15,7 @@ applies one of two filters and records every request in a SQLite database.
 
 ```sh
 npm install
-npm start          # http://localhost:3000
+npm start          # web page and API on http://localhost:3000
 npm test           # run the test suite once
 npm run test:watch # run tests in watch mode
 npm run typecheck  # type-check sources and tests
@@ -29,6 +29,11 @@ Configuration through environment variables:
 | `DATABASE_PATH` | `usage.db` | SQLite file where usage is recorded |
 
 ## API
+
+### `GET /`
+
+Serves the web page (`public/index.html`): one button per filter, a table with the filtered
+entries and a table with the recorded usage, newest first.
 
 ### `GET /entries?filter=long-titles|short-titles`
 
@@ -78,6 +83,7 @@ src/
   http/        requestHandler (routes), nodeAdapter (node:http glue), httpStatus
   shared/      Small helpers shared across modules
   server.ts    Composition root: creates real dependencies and starts the server
+public/        index.html: minimal web page (plain HTML and JavaScript)
 tests/         Mirrors src/; fixtures/ holds a saved copy of the front page
 ```
 
@@ -161,7 +167,7 @@ Request flow: `server.ts` → `nodeAdapter` → `requestHandler` → `crawlerSer
 
 ### HTTP
 
-- **No web framework**: with two GET routes, `node:http` is enough. Routes are written as a
+- **No web framework**: with three GET routes, `node:http` is enough. Routes are written as a
   `(Request) => Promise<Response>` function using the standard Fetch API, so they are tested by
   calling the function directly. A small adapter (`nodeAdapter`) connects it to `node:http`.
 - **Status codes**: `400` for client errors, `502` when Hacker News fails (the upstream failed,
@@ -172,6 +178,19 @@ Request flow: `server.ts` → `nodeAdapter` → `requestHandler` → `crawlerSer
 - **No build step**: the project type-checks with `tsc --noEmit` and runs with `tsx`, which keeps
   the setup simple for a small service.
 
+### Web page
+
+- **Plain HTML and JavaScript, no framework or build**: one page with two buttons and two tables
+  does not justify a frontend toolchain. It only calls the public API, so the API stays the
+  single source of behavior.
+- **The page is read once at startup** and injected into the request handler as a string, like
+  any other dependency, so the route is tested without disk access.
+- **`textContent`, never `innerHTML`**: titles come from an external site, so they are always
+  inserted as text to prevent HTML injection (XSS).
+- **One `render` function for both tables**: each table is described by its list of columns.
+- **Buttons are disabled while a crawl runs** to avoid duplicate requests to Hacker News, and the
+  usage table refreshes after every crawl, including failed ones.
+
 ### Testing
 
 - Tests describe behavior, mirror the `src/` layout and use realistic Hacker News data.
@@ -180,10 +199,11 @@ Request flow: `server.ts` → `nodeAdapter` → `requestHandler` → `crawlerSer
 - The SQLite repository is tested against an in-memory database; the crawler service and the
   request handler with fakes; the node adapter with a real server on a random local port.
   No test calls Hacker News.
+- The `GET /` route is tested, but the page's browser script is not: it was checked manually.
 - Work followed TDD: each feature has a `test:` commit followed by its `feat:` commit.
 
 ## Future work
 
 - Short in-memory cache for the front page (e.g. 60 seconds) to reduce load on Hacker News.
-- A frontend to browse the filtered entries and the usage log.
+- Automated tests for the web page script (e.g. with jsdom or Playwright).
 - Pagination and date filters for `GET /usage`.
