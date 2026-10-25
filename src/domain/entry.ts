@@ -1,6 +1,6 @@
-export interface Entry {
-    rank: number;
-    title: string;
-    points: number;
-    comments: number;
-}
+export type Entry = {
+    readonly rank: number;
+    readonly title: string;
+    readonly points: number;
+    readonly comments: number;
+};
