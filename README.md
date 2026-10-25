@@ -120,7 +120,7 @@ Request flow: `server.ts` → `nodeAdapter` → `requestHandler` → `crawlerSer
   site domain. Job posts have no points or comments and "discuss" means no comments; both
   are read as `0`. `&nbsp;` and singular forms (`1 point`, `1 comment`) are handled.
 - **No cache**: every request crawls the page live. A short in-memory cache would reduce load on
-  Hacker News, but it is not required and is left as future work.
+  Hacker News, but it is not required.
 
 ### Architecture
 
@@ -201,9 +201,3 @@ Request flow: `server.ts` → `nodeAdapter` → `requestHandler` → `crawlerSer
   No test calls Hacker News.
 - The `GET /` route is tested, but the page's browser script is not: it was checked manually.
 - Work followed TDD: each feature has a `test:` commit followed by its `feat:` commit.
-
-## Future work
-
-- Short in-memory cache for the front page (e.g. 60 seconds) to reduce load on Hacker News.
-- Automated tests for the web page script (e.g. with jsdom or Playwright).
-- Pagination and date filters for `GET /usage`.
